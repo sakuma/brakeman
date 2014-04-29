@@ -15,7 +15,7 @@ class Rails4Tests < Test::Unit::TestCase
       :controller => 0,
       :model => 1,
       :template => 2,
-      :generic => 22
+      :generic => 23
     }
   end
 
@@ -280,6 +280,18 @@ class Rails4Tests < Test::Unit::TestCase
       :confidence => 1,
       :relative_path => "app/models/user.rb",
       :user_input => s(:lvar, :col)
+  end
+
+  def test_render_with_before_action
+    assert_warning :type => :warning,
+      :warning_code => 15,
+      :fingerprint => "5b2267a68b4bfada283b59bdb9f453489111a5f2c335737588f88135d99426fa",
+      :warning_type => "Dynamic Render Path",
+      :line => 7,
+      :message => /^Render\ path\ contains\ parameter\ value/,
+      :confidence => 0,
+      :relative_path => "app/controllers/users_controller.rb",
+      :user_input => s(:call, s(:params), :[], s(:lit, :page))
   end
 
   def test_i18n_xss_CVE_2013_4491_workaround
