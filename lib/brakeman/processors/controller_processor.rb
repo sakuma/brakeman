@@ -116,9 +116,9 @@ class Brakeman::ControllerProcessor < Brakeman::BaseProcessor
         case method
         when :include
           @controller[:includes] << class_name(first_arg) if @controller
-        when :before_filter, :append_before_filter, :before_action
+        when :before_filter, :append_before_filter, :before_action, :append_before_action
           @controller[:options][:before_filters] << exp.args
-        when :prepend_before_filter
+        when :prepend_before_filter, :prepend_before_action
           @controller[:options][:before_filters].unshift exp.args
         when :layout
           if string? last_arg
