@@ -1,6 +1,6 @@
 abort "Please run using test/test.rb" unless defined? BrakemanTester
 
-Rails4WithEngines = BrakemanTester.run_scan "rails4_with_engines", "Rails4WithEngines"
+Rails4WithEngines = BrakemanTester.run_scan "rails4_with_engines", "Rails4WithEngines", :parallel_file_reads => true
 
 class Rails4WithEnginesTests < Test::Unit::TestCase
   include BrakemanTester::FindWarning

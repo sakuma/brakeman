@@ -5,7 +5,8 @@ require 'brakeman/differ'
 
 #Class for rescanning changed files after an initial scan
 class Brakeman::Rescanner < Brakeman::Scanner
-
+ include Brakeman::Util
+  KNOWN_TEMPLATE_EXTENSIONS = Brakeman::TemplateParser::KNOWN_TEMPLATE_EXTENSIONS
   SCAN_ORDER = [:config, :gemfile, :initializer, :lib, :routes, :template,
     :model, :controller]
 

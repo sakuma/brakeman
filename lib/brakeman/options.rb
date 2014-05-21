@@ -27,6 +27,10 @@ module Brakeman::Options
           options[:parallel_checks] = false
         end
 
+        opts.on "--parallel-file-read", "Read files in parallel" do
+          options[:parallel_file_read] = true
+        end
+
         opts.on "--[no-]progress", "Show progress reports" do |progress|
           options[:report_progress] = progress
         end
