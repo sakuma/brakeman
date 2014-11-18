@@ -608,4 +608,16 @@ class AliasProcessorTests < Test::Unit::TestCase
     x
     INPUT
   end
+
+  def test_multiple_assignment
+    assert_output <<-INPUT, <<-OUTPUT
+    x, $y = 1, 2
+    x
+    $y
+    INPUT
+    x, $y = 1, 2
+    1
+    2
+    OUTPUT
+  end
 end

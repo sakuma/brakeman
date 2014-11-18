@@ -351,6 +351,29 @@ class Brakeman::AliasProcessor < Brakeman::SexpProcessor
     exp
   end
 
+  # Multiple/parallel assignment:
+  #
+  # x, y = z, w
+  def process_masgn exp
+    vars = exp[1].dup
+    vals = exp[2].dup
+
+    unless array? vars and array? vals and vars.length == vals.length
+      return exp
+    end
+
+    vars.shift
+    vals.shift
+
+    # Call each assignment as if it is normal
+    vars.each_with_index do |var, i|
+      val = vals[i]
+      process(var.dup << val)
+    end
+
+    exp
+  end
+
   #Merge values into hash when processing
   #
   # h.merge! :something => "value"
