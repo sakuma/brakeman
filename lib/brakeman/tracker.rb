@@ -310,12 +310,9 @@ class Brakeman::Tracker
     #Remove from controller
     @controllers.each do |name, controller|
       if controller[:files].include?(path)
-        controller_name = name
-        template_matcher = /^#{name}#/
-
         #Remove templates rendered from this controller
         @templates.each do |template_name, template|
-          if template[:caller] and not template[:caller].grep(template_matcher).empty?
+          if template[:caller] and template[:caller].include_controller? name
             reset_template template_name
             @call_index.remove_template_indexes template_name
           end
