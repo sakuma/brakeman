@@ -59,6 +59,9 @@ class Brakeman::CheckNumberToCurrency < Brakeman::BaseCheck
   end
 
   def warn_on_number_helper result, match
+    return if duplicate? result
+    add_result result
+
     warn :result => result,
       :warning_type => "Cross Site Scripting",
       :warning_code => :CVE_2014_0081_call,

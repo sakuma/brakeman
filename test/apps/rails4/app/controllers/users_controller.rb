@@ -76,4 +76,7 @@ class UsersController < ApplicationController
            "dunno"
          end
   end
+
+  def index
+  end
 end
