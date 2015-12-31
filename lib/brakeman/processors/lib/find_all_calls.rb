@@ -162,15 +162,20 @@ class Brakeman::FindAllCalls < Brakeman::BasicProcessor
     end
   end
 
+  EMPTY_ARRAY = []
+
   #Returns method chain as an array
   #For example, User.human.alive.all would return [:User, :human, :alive, :all]
   def get_chain call
+    cached = @cache[call]
+    return cached if cached
+
     if node_type? call, :call, :attrasgn
-      get_chain(call.target) + [call.method]
+      @cache[call] = get_chain(call.target) + [call.method]
     elsif call.nil?
-      []
+      EMPTY_ARRAY
     else
-      [get_target(call)]
+      @cache[call] = [get_target(call)]
     end
   end
 
