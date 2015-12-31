@@ -10,7 +10,7 @@ class Brakeman::TemplateProcessor < Brakeman::BaseProcessor
     @current_template = Brakeman::Template.new template_name, called_from, file_name, tracker
 
     if called_from
-      template_name = (template_name.to_s + "." + called_from.to_s).to_sym
+      template_name = :"#{template_name}.#{called_from}"
     end
 
     tracker.templates[template_name] = @current_template

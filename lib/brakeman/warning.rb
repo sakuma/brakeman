@@ -53,7 +53,7 @@ class Brakeman::Warning
       end
     end
 
-    if @method.to_s =~ /^fake_filter\d+/
+    if @method =~ /^fake_filter\d+/
       @method = :before_filter
     end
 
@@ -200,7 +200,7 @@ class Brakeman::Warning
 
   def fingerprint
     loc = self.location
-    location_string = loc && loc.sort_by { |k, v| k.to_s }.inspect
+    location_string = loc && loc.sort_by { |k, v| k }.inspect
     warning_code_string = sprintf("%03d", @warning_code)
     code_string = @code.inspect
 

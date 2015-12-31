@@ -24,7 +24,7 @@ class Brakeman::CheckModelAttrAccessible < Brakeman::BaseCheck
         next if role_limited? model, attribute
 
         SUSP_ATTRS.each do |susp_attr, confidence|
-          if susp_attr.is_a?(Regexp) and susp_attr =~ attribute.to_s or susp_attr == attribute
+          if susp_attr.is_a?(Regexp) and susp_attr =~ attribute or susp_attr == attribute
             warn :model => name,
               :file => model.file,
               :warning_type => "Mass Assignment",

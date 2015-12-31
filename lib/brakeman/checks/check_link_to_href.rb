@@ -102,14 +102,14 @@ class Brakeman::CheckLinkToHref < Brakeman::CheckLinkTo
 
   def ignored_method? target, method
     @ignore_methods.include? method or
-      method.to_s =~ /_path$/ or
-      (target.nil? and method.to_s =~ /_url$/)
+      method =~ /_path$/ or
+      (target.nil? and method =~ /_url$/)
   end
 
   def model_find_call? exp
     return unless call? exp
 
     MODEL_METHODS.include? exp.method or
-      exp.method.to_s =~ /^find_by_/
+      exp.method =~ /^find_by_/
   end
 end

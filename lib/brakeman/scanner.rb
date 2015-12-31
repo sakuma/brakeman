@@ -226,7 +226,7 @@ class Brakeman::Scanner
   end
 
   def process_controller_data_flows
-    controllers = tracker.controllers.sort_by { |name, _| name.to_s }
+    controllers = tracker.controllers.sort_by { |name, _| name }
 
     track_progress controllers, "controllers" do |name, controller|
       Brakeman.debug "Processing #{name}"
@@ -264,7 +264,7 @@ class Brakeman::Scanner
   end
 
   def process_template_data_flows
-    templates = tracker.templates.sort_by { |name, _| name.to_s }
+    templates = tracker.templates.sort_by { |name, _| name }
 
     track_progress templates, "templates" do |name, template|
       Brakeman.debug "Processing #{name}"

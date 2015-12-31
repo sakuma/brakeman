@@ -24,11 +24,11 @@ class Brakeman::LibraryProcessor < Brakeman::BaseProcessor
 
     if @current_class
       outer_class = @current_class
-      name = (outer_class.name.to_s + "::" + name.to_s).to_sym
+      name = ("#{outer_class.name}::#{name}").to_sym
     end
 
     if @current_module
-      name = (@current_module.name.to_s + "::" + name.to_s).to_sym
+      name = ("#{@current_module.name}::#{name}").to_sym
     end
 
     if @tracker.libs[name]
@@ -55,11 +55,11 @@ class Brakeman::LibraryProcessor < Brakeman::BaseProcessor
 
     if @current_module
       outer_module = @current_module
-      name = (outer_module.name.to_s + "::" + name.to_s).to_sym
+      name = ("#{outer_module.name}::#{name}").to_sym
     end
 
     if @current_class
-      name = (@current_class.name.to_s + "::" + name.to_s).to_sym
+      name = ("#{@current_class.name}::#{name}").to_sym
     end
 
     if @tracker.libs[name]

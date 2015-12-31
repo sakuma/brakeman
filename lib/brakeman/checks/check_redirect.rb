@@ -87,7 +87,7 @@ class Brakeman::CheckRedirect < Brakeman::BaseCheck
       elsif arg.method == :url_for and include_user_input? arg
         return Match.new(immediate, arg)
         #Ignore helpers like some_model_url?
-      elsif arg.method.to_s =~ /_(url|path)\z/
+      elsif arg.method =~ /_(url|path)\z/
         return false
       end
     elsif request_value? arg
@@ -157,7 +157,7 @@ class Brakeman::CheckRedirect < Brakeman::BaseCheck
       model_instance? exp.lhs or model_instance? exp.rhs
     elsif call? exp
       if model_target? exp and
-        (@model_find_calls.include? exp.method or exp.method.to_s.match(/^find_by_/))
+        (@model_find_calls.include? exp.method or exp.method.match(/^find_by_/))
         true
       else
         association?(exp.target, exp.method)
@@ -187,7 +187,7 @@ class Brakeman::CheckRedirect < Brakeman::BaseCheck
       tracker.config.has_gem? :draper and
       call? exp and
       node_type?(exp.target, :const) and
-      exp.target.value.to_s.match(/Decorator$/) and
+      exp.target.value.match(/Decorator$/) and
       exp.method == :decorate
     end
   end

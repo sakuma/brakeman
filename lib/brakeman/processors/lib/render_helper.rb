@@ -85,7 +85,7 @@ module Brakeman::RenderHelper
         process_template "layouts/#{options[:layout][1]}", nil, nil, nil
       elsif node_type? options[:layout], :false
         #nothing
-      elsif not template.name.to_s.match(/[^\/_][^\/]+$/)
+      elsif not template.name.match(/[^\/_][^\/]+$/)
         #Don't do this for partials
         
         process_layout

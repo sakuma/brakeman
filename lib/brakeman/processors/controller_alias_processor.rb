@@ -44,7 +44,7 @@ class Brakeman::ControllerAliasProcessor < Brakeman::AliasProcessor
       next unless mixin
 
       #Process methods in alphabetical order for consistency
-      methods = mixin.methods_public.keys.map { |n| n.to_s }.sort.map { |n| n.to_sym }
+      methods = mixin.methods_public.keys.sort
 
       methods.each do |name|
         #Need to process the method like it was in a controller in order
@@ -195,7 +195,7 @@ class Brakeman::ControllerAliasProcessor < Brakeman::AliasProcessor
     else
       controller = @current_class.to_s.gsub("Controller", "")
       controller.gsub!("::", "/")
-      underscore(controller + "/" + name.to_s)
+      underscore("#{controller}/#{name}")
     end
   end
 

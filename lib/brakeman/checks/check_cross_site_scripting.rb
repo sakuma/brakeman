@@ -349,7 +349,7 @@ class Brakeman::CheckCrossSiteScripting < Brakeman::BaseCheck
   end
 
   def ignored_method? target, method
-    @ignore_methods.include? method or method.to_s =~ IGNORE_LIKE
+    @ignore_methods.include? method or method =~ IGNORE_LIKE
   end
 
   def cgi_escaped? target, method

@@ -163,7 +163,7 @@ class Brakeman::CallIndex
   def calls_by_methods_regex methods_regex
     calls = []
     @calls_by_method.each do |key, value|
-      calls.concat value if key.to_s.match methods_regex
+      calls.concat value if key.match methods_regex
     end
     calls
   end
@@ -181,7 +181,7 @@ class Brakeman::CallIndex
       end
     elsif value.is_a? Regexp
       calls.select do |call|
-        call[key].to_s.match value
+        call[key].match value
       end
     else
       calls.select do |call|
@@ -211,7 +211,7 @@ class Brakeman::CallIndex
       end
     elsif target.is_a? Regexp
       calls.select do |call|
-        call[:chain].first.to_s.match target
+        call[:chain].first.match target
       end
     else
       calls.select do |call|
