@@ -153,7 +153,7 @@ class Brakeman::CheckRedirect < Brakeman::BaseCheck
 
   #Returns true if exp is (probably) a model instance
   def model_instance? exp
-    if node_type? exp, :or
+    if node_is? exp, :or
       model_instance? exp.lhs or model_instance? exp.rhs
     elsif call? exp
       if model_target? exp and
@@ -181,12 +181,12 @@ class Brakeman::CheckRedirect < Brakeman::BaseCheck
   #Returns true if exp is (probably) a decorated model instance
   #using the Draper gem
   def decorated_model? exp
-    if node_type? exp, :or
+    if node_is? exp, :or
       decorated_model? exp.lhs or decorated_model? exp.rhs
     else
       tracker.config.has_gem? :draper and
       call? exp and
-      node_type?(exp.target, :const) and
+      node_is?(exp.target, :const) and
       exp.target.value.match(/Decorator$/) and
       exp.method == :decorate
     end

@@ -69,7 +69,7 @@ class Brakeman::CheckSessionSettings < Brakeman::BaseCheck
   def settings_target? exp
     call? exp and
     exp.method == :config and
-    node_type? exp.target, :colon2 and
+    node_is? exp.target, :colon2 and
     exp.target.rhs == :Application
   end
 

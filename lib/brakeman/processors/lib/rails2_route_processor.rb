@@ -90,7 +90,7 @@ class Brakeman::Rails2RoutesProcessor < Brakeman::BasicProcessor
       process_resource_options exp[-1]
     else
       exp.each do |argument|
-        if node_type? argument, :lit
+        if node_is? argument, :lit
           self.current_controller = exp.first.value
           add_resources_routes
           process_resource_options exp.last
@@ -167,7 +167,7 @@ class Brakeman::Rails2RoutesProcessor < Brakeman::BasicProcessor
       process_resource_options exp.last
     else
       exp.each do |argument|
-        if node_type? argument, :lit
+        if node_is? argument, :lit
           self.current_controller = pluralize(exp.first.value.to_s)
           add_resource_routes
           process_resource_options exp.last
@@ -202,7 +202,7 @@ class Brakeman::Rails2RoutesProcessor < Brakeman::BasicProcessor
       if symbol? e and e.value == :action
         action = exp.last[i + 1]
         
-        if node_type? action, :lit
+        if node_is? action, :lit
           @tracker.routes[@current_controller] << action.value.to_sym
         end
 

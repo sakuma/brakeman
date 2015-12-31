@@ -48,7 +48,7 @@ class Brakeman::CheckSymbolDoS < Brakeman::BaseCheck
 
   def safe_parameter? input
     if call? input
-      if node_type? input.target, :params
+      if node_is? input.target, :params
         input.method == :[] and
         symbol? input.first_arg and
         [:controller, :action].include? input.first_arg.value

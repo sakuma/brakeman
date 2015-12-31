@@ -21,7 +21,7 @@ class Brakeman::ControllerAliasProcessor < Brakeman::AliasProcessor
   end
 
   def process_controller name, src, file
-    if not node_type? src, :class
+    if not node_is? src, :class
       Brakeman.debug "#{name} is not a class, it's a #{src.node_type}"
       return
     else
@@ -52,7 +52,7 @@ class Brakeman::ControllerAliasProcessor < Brakeman::AliasProcessor
         processor = Brakeman::ControllerProcessor.new(@app_tree, @tracker)
         method = mixin.get_method(name)[:src].deep_clone
 
-        if node_type? method, :defn
+        if node_is? method, :defn
           method = processor.process_defn method
         else
           #Should be a defn, but this will catch other cases

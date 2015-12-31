@@ -104,7 +104,7 @@ class Brakeman::Rails2ConfigProcessor < Brakeman::BasicProcessor
   #
   #  [:action_controller, :session_store]
   def get_rails_config exp
-    if node_type? exp, :attrasgn
+    if node_is? exp, :attrasgn
       attribute = exp.method.to_s[0..-2].to_sym
       get_rails_config(exp.target) << attribute
     elsif call? exp

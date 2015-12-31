@@ -62,9 +62,9 @@ class Brakeman::FindReturnValue
     until todo.empty?
       current = todo.shift
 
-      @uses_ivars = true if node_type? current, :ivar
+      @uses_ivars = true if node_is? current, :ivar
 
-      if node_type? current, :return
+      if node_is? current, :return
         @return_values << current.value unless current.value.nil?
       elsif sexp? current
         todo = current[1..-1].concat todo

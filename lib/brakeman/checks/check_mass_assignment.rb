@@ -79,7 +79,7 @@ class Brakeman::CheckMassAssignment < Brakeman::BaseCheck
 
         if call? first_arg and (first_arg.method == :slice or first_arg.method == :only)
           return
-        elsif not node_type? first_arg, :hash
+        elsif not node_is? first_arg, :hash
           if attr_protected
             confidence = CONFIDENCE[:med]
           else

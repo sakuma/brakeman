@@ -85,7 +85,7 @@ class Brakeman::CheckExecute < Brakeman::BaseCheck
     if string_interp? exp
       # Check for input at start of string
       exp[1] == "" and
-        node_type? exp[2], :evstr and
+        node_is? exp[2], :evstr and
         has_immediate_user_input? exp[2]
     else
       has_immediate_user_input? exp

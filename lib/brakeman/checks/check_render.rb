@@ -13,7 +13,7 @@ class Brakeman::CheckRender < Brakeman::BaseCheck
   end
 
   def process_render_result result
-    return unless node_type? result[:call], :render
+    return unless node_is? result[:call], :render
 
     case result[:call].render_type
     when :partial, :template, :action, :file

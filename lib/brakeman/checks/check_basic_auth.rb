@@ -67,7 +67,7 @@ class Brakeman::CheckBasicAuth < Brakeman::BaseCheck
   def process_call exp
     target = exp.target
 
-    if node_type?(target, :lvar) and
+    if node_is?(target, :lvar) and
       target.value == @password_var and
       exp.method == :== and
       string? exp.first_arg

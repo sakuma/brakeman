@@ -130,7 +130,7 @@ class Brakeman::HamlTemplateProcessor < Brakeman::TemplateProcessor
   #TODO: Test this
   def is_buffer_target? exp
     exp.node_type == :call and
-    node_type? exp.target, :lvar and
+    node_is? exp.target, :lvar and
     exp.target.value == :_hamlout and
     exp.method == :buffer
   end
@@ -141,7 +141,7 @@ class Brakeman::HamlTemplateProcessor < Brakeman::TemplateProcessor
     if string_interp? exp
       exp.map! do |e|
         if sexp? e
-          if node_type? e, :evstr and e[1]
+          if node_is? e, :evstr and e[1]
             e = e.value
           end
 

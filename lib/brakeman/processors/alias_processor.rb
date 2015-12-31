@@ -82,6 +82,7 @@ class Brakeman::AliasProcessor < Brakeman::SexpProcessor
 
   ARRAY_CONST = s(:const, :Array)
   HASH_CONST = s(:const, :Hash)
+  MATH_OPS = Set[:+, :-, :*, :/]
 
   #Process a method call.
   def process_call exp
@@ -103,12 +104,12 @@ class Brakeman::AliasProcessor < Brakeman::SexpProcessor
       collapse_send_call exp, first_arg
     end
 
-    if node_type? target, :or and [:+, :-, :*, :/].include? method
+    if node_is? target, :or and MATH_OPS.include? method
       res = process_or_simple_operation(exp)
       return res if res
     elsif target == ARRAY_CONST and method == :new
       return Sexp.new(:array, *exp.args)
-    elsif target == HASH_CONST and method == :new and first_arg.nil? and !node_type?(@exp_context.last, :iter)
+    elsif target == HASH_CONST and method == :new and first_arg.nil? and !node_is?(@exp_context.last, :iter)
       return Sexp.new(:hash)
     end
 
@@ -217,9 +218,9 @@ class Brakeman::AliasProcessor < Brakeman::SexpProcessor
     env.scope do
       exp.block_args.each do |e|
         #Force block arg(s) to be local
-        if node_type? e, :lasgn
+        if node_is? e, :lasgn
           env.current[Sexp.new(:lvar, e.lhs)] = Sexp.new(:lvar, e.lhs)
-        elsif node_type? e, :kwarg
+        elsif node_is? e, :kwarg
           env.current[Sexp.new(:lvar, e[1])] = e[2]
         elsif node_type? e, :masgn, :shadow
           e[1..-1].each do |var|
@@ -519,7 +520,7 @@ class Brakeman::AliasProcessor < Brakeman::SexpProcessor
   def array_include_all_literals? exp
     call? exp and
     exp.method == :include? and
-    node_type? exp.target, :array and
+    node_is? exp.target, :array and
     exp.target.length > 1 and
     exp.target.all? { |e| e.is_a? Symbol or node_type? e, :lit, :str }
   end
@@ -616,7 +617,7 @@ class Brakeman::AliasProcessor < Brakeman::SexpProcessor
 
   def too_deep? exp
     @or_depth_limit >= 0 and
-    node_type? exp, :or and
+    node_is? exp, :or and
     exp.or_depth and
     exp.or_depth >= @or_depth_limit
   end
@@ -663,7 +664,7 @@ class Brakeman::AliasProcessor < Brakeman::SexpProcessor
   # Change x.send(:y, 1) to x.y(1)
   def collapse_send_call exp, first_arg
     # Handle try(&:id)
-    if node_type? first_arg, :block_pass
+    if node_is? first_arg, :block_pass
       first_arg = first_arg[1]
     end
 
@@ -838,7 +839,7 @@ class Brakeman::AliasProcessor < Brakeman::SexpProcessor
   def same_value? lhs, rhs
     if lhs == rhs
       true
-    elsif node_type? lhs, :or
+    elsif node_is? lhs, :or
       lhs.rhs == rhs or lhs.lhs == rhs
     else
       false
@@ -872,7 +873,7 @@ class Brakeman::AliasProcessor < Brakeman::SexpProcessor
   def top_target exp, last = nil
     if call? exp
       top_target exp.target, exp
-    elsif node_type? exp, :iter
+    elsif node_is? exp, :iter
       top_target exp.block_call, last
     else
       exp || last
@@ -906,12 +907,12 @@ class Brakeman::AliasProcessor < Brakeman::SexpProcessor
   #Avoids creating multiple branched versions inside same
   #if branch.
   def set_value var, value
-    if node_type? value, :if
+    if node_is? value, :if
       value = value_from_if(value)
     end
 
     if @ignore_ifs or not @inside_if
-      if @meth_env and node_type? var, :ivar and env[var].nil?
+      if @meth_env and node_is? var, :ivar and env[var].nil?
         @meth_env[var] = value
       else
         env[var] = value
@@ -920,7 +921,7 @@ class Brakeman::AliasProcessor < Brakeman::SexpProcessor
       env.current[var] = value
     elsif @branch_env and @branch_env[var]
       @branch_env[var] = value
-    elsif @branch_env and @meth_env and node_type? var, :ivar
+    elsif @branch_env and @meth_env and node_is? var, :ivar
       @branch_env[var] = value
     else
       env.current[var] = value

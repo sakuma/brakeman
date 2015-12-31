@@ -137,13 +137,13 @@ class Brakeman::ControllerProcessor < Brakeman::BaseProcessor
         when :include
           @current_class.add_include class_name(first_arg) if @current_class
         when :before_filter, :append_before_filter, :before_action, :append_before_action
-          if node_type? exp.first_arg, :iter
+          if node_is? exp.first_arg, :iter
             add_lambda_filter exp
           else
             @current_class.add_before_filter exp
           end
         when :prepend_before_filter, :prepend_before_action
-          if node_type? exp.first_arg, :iter
+          if node_is? exp.first_arg, :iter
             add_lambda_filter exp
           else
             @current_class.prepend_before_filter exp
@@ -208,7 +208,7 @@ class Brakeman::ControllerProcessor < Brakeman::BaseProcessor
   def process_defs exp
     name = exp.method_name
 
-    if node_type? exp[1], :self
+    if node_is? exp[1], :self
       if @current_class
         target = @current_class.name
       elsif @current_module
@@ -282,7 +282,7 @@ class Brakeman::ControllerProcessor < Brakeman::BaseProcessor
       block_variable = :temp
     end
 
-    if node_type? exp.block, :block
+    if node_is? exp.block, :block
       block_inner = exp.block[1..-1]
     else
       block_inner = [exp.block]
@@ -310,7 +310,7 @@ class Brakeman::ControllerProcessor < Brakeman::BaseProcessor
     result = Sexp.new(:iter, e).line(e.line)
 
     # Add block arguments
-    if node_type? lambda_node[2], :args
+    if node_is? lambda_node[2], :args
       result << lambda_node[2].last
     else
       result << s(:args)

@@ -33,7 +33,7 @@ class Brakeman::Rails3ConfigProcessor < Brakeman::BasicProcessor
   def process_iter exp
     call = exp.block_call
 
-    if node_type?(call.target, :colon2) and
+    if node_is?(call.target, :colon2) and
       call.target.rhs == :Application and
       call.method == :configure
 
@@ -115,7 +115,7 @@ class Brakeman::Rails3ConfigProcessor < Brakeman::BasicProcessor
   #
   #  [:action_controller, :session_store]
   def get_rails_config exp
-    if node_type? exp, :attrasgn
+    if node_is? exp, :attrasgn
       attribute = exp.method.to_s[0..-2].to_sym
       get_rails_config(exp.target) << attribute
     elsif call? exp

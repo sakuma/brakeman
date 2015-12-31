@@ -44,7 +44,7 @@ module Brakeman
         args = []
 
         exp.each_arg do |e|
-          if node_type? e, :lit
+          if node_is? e, :lit
             args << e.value
           elsif hash? e
             @role_accessible.concat args

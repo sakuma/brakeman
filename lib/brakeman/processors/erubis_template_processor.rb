@@ -27,7 +27,7 @@ class Brakeman::ErubisTemplateProcessor < Brakeman::TemplateProcessor
 
         if arg.node_type == :str #ignore plain strings
           ignore
-        elsif node_type? target, :ivar and target.value == :@output_buffer
+        elsif node_is? target, :ivar and target.value == :@output_buffer
           s = Sexp.new :escaped_output, arg
           s.line(exp.line)
           @current_template.add_output s

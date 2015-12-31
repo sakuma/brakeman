@@ -187,7 +187,7 @@ class Brakeman::BaseCheck < Brakeman::SexpProcessor
           if result.module == "ActiveRecord" and result.result_class == :Base
             arg = result.call.first_arg
 
-            if arg.nil? or node_type? arg, :nil
+            if arg.nil? or node_is? arg, :nil
               @mass_assign_disabled = true
               break
             end

@@ -247,14 +247,14 @@ class Brakeman::CheckSQL < Brakeman::BaseCheck
   def check_scope_arguments call
     scope_arg = call.second_arg #first arg is name of scope
 
-    node_type?(scope_arg, :iter) ? unsafe_sql?(scope_arg.block) : unsafe_sql?(scope_arg)
+    node_is?(scope_arg, :iter) ? unsafe_sql?(scope_arg.block) : unsafe_sql?(scope_arg)
   end
 
   def check_query_arguments arg
     return unless sexp? arg
     first_arg = arg[1]
 
-    if node_type? arg, :arglist
+    if node_is? arg, :arglist
       if arg.length > 2 and string_interp? first_arg
         # Model.where("blah = ?", blah)
         return check_string_interp first_arg
@@ -283,7 +283,7 @@ class Brakeman::CheckSQL < Brakeman::BaseCheck
   def check_order_arguments args
     return unless sexp? args
 
-    if node_type? args, :arglist
+    if node_is? args, :arglist
       check_update_all_arguments(args)
     else
       unsafe_sql? args
@@ -366,7 +366,7 @@ class Brakeman::CheckSQL < Brakeman::BaseCheck
 
   #Returns value if interpolated value is not something safe
   def unsafe_string_interp? exp
-    if node_type? exp, :evstr
+    if node_is? exp, :evstr
       value = exp.value
     else
       value = exp
@@ -650,7 +650,7 @@ class Brakeman::CheckSQL < Brakeman::BaseCheck
 
       target.nil? or
       target == SELF_CLASS or
-      node_type? target, :self or
+      node_is? target, :self or
       klass == :"ActiveRecord::Base" or
       active_record_models.include? klass
     end

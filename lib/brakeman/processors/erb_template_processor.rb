@@ -13,7 +13,7 @@ class Brakeman::ErbTemplateProcessor < Brakeman::TemplateProcessor
     method = exp.method
     
     #_erbout is the default output variable for erb
-    if node_type? target, :lvar and target.value == :_erbout
+    if node_is? target, :lvar and target.value == :_erbout
       if method == :concat
         @inside_concat = true
         exp.arglist = process(exp.arglist)
@@ -68,7 +68,7 @@ class Brakeman::ErbTemplateProcessor < Brakeman::TemplateProcessor
         res = process e
         if res.empty? or res == ignore
           nil
-        elsif node_type?(res, :lvar) and res.value == :_erbout
+        elsif node_is?(res, :lvar) and res.value == :_erbout
           nil
 
         else

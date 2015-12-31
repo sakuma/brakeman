@@ -163,7 +163,7 @@ class Brakeman::ModelProcessor < Brakeman::BaseProcessor
     return exp unless @current_class
     name = exp.method_name
 
-    if node_type? exp[1], :self
+    if node_is? exp[1], :self
       if @current_class
         target = @current_class.name
       elsif @current_module

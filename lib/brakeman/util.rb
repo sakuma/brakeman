@@ -263,6 +263,11 @@ module Brakeman::Util
     exp.is_a? Sexp and types.include? exp.node_type
   end
 
+  #Check if _exp_ is a Sexp and the node type matches the given type.
+  def node_is? exp, type
+    exp.is_a? Sexp and type == exp.node_type
+  end
+
   #Returns true if the given _exp_ contains a :class node.
   #
   #Useful for checking if a module is just a module or if it is a namespace.
@@ -272,7 +277,7 @@ module Brakeman::Util
     until todo.empty?
       current = todo.shift
 
-      if node_type? current, :class
+      if node_is? current, :class
         return true
       elsif sexp? current
         todo = current[1..-1].concat todo
@@ -287,7 +292,7 @@ module Brakeman::Util
 
     if args.empty? or args.first.empty?
       #nothing to do
-    elsif node_type? args.first, :arglist
+    elsif node_is? args.first, :arglist
       call.concat args.first[1..-1]
     elsif args.first.node_type.is_a? Sexp #just a list of args
       call.concat args.first
