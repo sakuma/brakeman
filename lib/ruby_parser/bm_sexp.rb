@@ -4,6 +4,13 @@
 class Sexp
   attr_accessor :original_line, :or_depth
   ASSIGNMENT_BOOL = [:gasgn, :iasgn, :lasgn, :cvdecl, :cvasgn, :cdecl, :or, :and, :colon2]
+  METHOD_DEF = [:defn, :defs]
+  NORMAL_CALL = [:call, :attrasgn]
+  ANY_CALL = [:call, :attrasgn, :super, :zsuper, :result]
+  BLOCK = [:iter, :scope, :resbody]
+  RHS = [:attrasgn] + ASSIGNMENT_BOOL
+  CLASS_DEF = [:class, :module]
+  BODY_DEF = METHOD_DEF + CLASS_DEF
 
   def method_missing name, *args
     #Brakeman does not use this functionality,
@@ -130,9 +137,15 @@ class Sexp
 
   #Raise a WrongSexpError if the nodes type does not match one of the expected
   #types.
-  def expect *types
+  def expect types
     unless types.include? self.node_type
       raise WrongSexpError, "Expected #{types.join ' or '} but given #{self.inspect}", caller[1..-1]
+    end
+  end
+
+  def expect_type type
+    unless type == self.node_type
+      raise WrongSexpError, "Expected #{type} but given #{self.inspect}", caller[1..-1]
     end
   end
 
@@ -141,13 +154,13 @@ class Sexp
   #s(:call, s(:call, nil, :x, s(:arglist)), :y, s(:arglist, s(:lit, 1)))
   #         ^-----------target-----------^
   def target
-    expect :call, :attrasgn
+    expect NORMAL_CALL
     self[1]
   end
 
   #Sets the target of a method call:
   def target= exp
-    expect :call, :attrasgn
+    expect NORMAL_CALL
     @my_hash_value = nil
     self[1] = exp
   end
@@ -157,7 +170,7 @@ class Sexp
   #s(:call, s(:call, nil, :x, s(:arglist)), :y, s(:arglist, s(:lit, 1)))
   #                        ^- method
   def method
-    expect :call, :attrasgn, :super, :zsuper, :result
+    expect ANY_CALL
 
     case self.node_type
     when :call, :attrasgn
@@ -170,14 +183,14 @@ class Sexp
   end
 
   def method= name
-    expect :call
+    expect_type :call
 
     self[2] = name
   end
 
   #Sets the arglist in a method call.
   def arglist= exp
-    expect :call, :attrasgn
+    expect NORMAL_CALL
     @my_hash_value = nil
     start_index = 3
 
@@ -201,7 +214,7 @@ class Sexp
   #    s(:call, s(:call, nil, :x, s(:arglist)), :y, s(:arglist, s(:lit, 1), s(:lit, 2)))
   #                                                 ^------------ arglist ------------^
   def arglist
-    expect :call, :attrasgn, :super, :zsuper
+    expect ANY_CALL
 
     case self.node_type
     when :call, :attrasgn
@@ -220,7 +233,7 @@ class Sexp
   #    s(:call, s(:call, nil, :x, s(:arglist)), :y, s(:arglist, s(:lit, 1), s(:lit, 2)))
   #                                                             ^--------args--------^
   def args
-    expect :call, :attrasgn, :super, :zsuper
+    expect ANY_CALL
 
     case self.node_type
     when :call, :attrasgn
@@ -239,7 +252,7 @@ class Sexp
   end
 
   def each_arg replace = false
-    expect :call, :attrasgn, :super, :zsuper
+    expect ANY_CALL
     range = nil
 
     case self.node_type
@@ -270,43 +283,43 @@ class Sexp
 
   #Returns first argument of a method call.
   def first_arg
-    expect :call, :attrasgn
+    expect NORMAL_CALL
     self[3]
   end
 
   #Sets first argument of a method call.
   def first_arg= exp
-    expect :call, :attrasgn
+    expect NORMAL_CALL
     @my_hash_value = nil
     self[3] = exp
   end
 
   #Returns second argument of a method call.
   def second_arg
-    expect :call, :attrasgn
+    expect NORMAL_CALL
     self[4]
   end
 
   #Sets second argument of a method call.
   def second_arg= exp
-    expect :call, :attrasgn
+    expect NORMAL_CALL
     @my_hash_value = nil
     self[4] = exp
   end
 
   def third_arg
-    expect :call, :attrasgn
+    expect NORMAL_CALL
     self[5]
   end
 
   def third_arg= exp
-    expect :call, :attrasgn
+    expect NORMAL_CALL
     @my_hash_value = nil
     self[5] = exp
   end
 
   def last_arg
-    expect :call, :attrasgn
+    expect NORMAL_CALL
 
     if self[3]
       self[-1]
@@ -322,7 +335,7 @@ class Sexp
   #     s(:lvar, :then_val),
   #     s(:lvar, :else_val)))
   def condition
-    expect :if
+    expect_type :if
     self[1]
   end
 
@@ -333,7 +346,7 @@ class Sexp
   #     s(:lvar, :then_val), <-- then clause
   #     s(:lvar, :else_val)))
   def then_clause
-    expect :if
+    expect_type :if
     self[2]
   end
 
@@ -345,7 +358,7 @@ class Sexp
   #     s(:lvar, :else_val)))
   #     ^---else caluse---^
   def else_clause
-    expect :if
+    expect_type :if
     self[3]
   end
 
@@ -356,7 +369,7 @@ class Sexp
   #      s(:lasgn, :y),
   #       s(:block, s(:lvar, :y), s(:call, nil, :z, s(:arglist))))
   def block_call
-    expect :iter
+    expect_type :iter
     self[1]
   end
 
@@ -373,7 +386,7 @@ class Sexp
       return find_node :block, delete
     end
 
-    expect :iter, :scope, :resbody
+    expect BLOCK
 
     case self.node_type
     when :iter
@@ -393,7 +406,7 @@ class Sexp
   #      s(:lasgn, :y), <- block_args
   #       s(:call, nil, :p, s(:arglist, s(:lvar, :y))))
   def block_args
-    expect :iter
+    expect_type :iter
     if self[2] == 0 # ?! See https://github.com/presidentbeef/brakeman/issues/331
       return Sexp.new(:args)
     else
@@ -402,7 +415,7 @@ class Sexp
   end
 
   def first_param
-    expect :args
+    expect_type :args
     self[1]
   end
 
@@ -411,13 +424,13 @@ class Sexp
   #    s(:lasgn, :x, s(:lit, 1))
   #               ^--lhs
   def lhs
-    expect(*ASSIGNMENT_BOOL)
+    expect ASSIGNMENT_BOOL
     self[1]
   end
 
   #Sets the left hand side of assignment or boolean.
   def lhs= exp
-    expect(*ASSIGNMENT_BOOL)
+    expect ASSIGNMENT_BOOL
     @my_hash_value = nil
     self[1] = exp
   end
@@ -427,7 +440,7 @@ class Sexp
   #    s(:lasgn, :x, s(:lit, 1))
   #                  ^--rhs---^
   def rhs
-    expect :attrasgn, *ASSIGNMENT_BOOL
+    expect RHS
 
     if self.node_type == :attrasgn
       self[3]
@@ -438,7 +451,7 @@ class Sexp
 
   #Sets the right hand side of assignment or boolean.
   def rhs= exp
-    expect :attrasgn, *ASSIGNMENT_BOOL
+    expect RHS
     @my_hash_value = nil
 
     if self.node_type == :attrasgn
@@ -450,7 +463,7 @@ class Sexp
 
   #Returns name of method being defined in a method definition.
   def method_name
-    expect :defn, :defs
+    expect METHOD_DEF
 
     case self.node_type
     when :defn
@@ -461,7 +474,7 @@ class Sexp
   end
 
   def formal_args
-    expect :defn, :defs
+    expect METHOD_DEF
 
     case self.node_type
     when :defn
@@ -474,7 +487,7 @@ class Sexp
   #Sets body, which is now a complicated process because the body is no longer
   #a separate Sexp, but just a list of Sexps.
   def body= exp
-    expect :defn, :defs, :class, :module
+    expect BODY_DEF
     @my_hash_value = nil
 
     case self.node_type
@@ -498,7 +511,7 @@ class Sexp
   #Returns body of a method definition, class, or module.
   #This will be an untyped Sexp containing a list of Sexps from the body.
   def body
-    expect :defn, :defs, :class, :module
+    expect BODY_DEF
 
     case self.node_type
     when :defn, :class
@@ -517,39 +530,39 @@ class Sexp
   end
 
   def render_type
-    expect :render
+    expect_type :render
     self[1]
   end
 
   def class_name
-    expect :class, :module
+    expect CLASS_DEF
     self[1]
   end
 
   alias module_name class_name
 
   def parent_name
-    expect :class
+    expect_type :class
     self[2]
   end
 
   #Returns the call Sexp in a result returned from FindCall
   def call
-    expect :result
+    expect_type :result
 
     self.last
   end
 
   #Returns the module the call is inside
   def module
-    expect :result
+    expect_type :result
 
     self[1]
   end
 
   #Return the class the call is inside
   def result_class
-    expect :result
+    expect_type :result
 
     self[2]
   end
@@ -566,7 +579,7 @@ class Sexp
         else
           x.inspect
         end
-      end.join(', ')
+      end.join(', '.freeze)
 
       "s(#{sexp_str})"
     end
