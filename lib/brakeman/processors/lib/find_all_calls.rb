@@ -170,12 +170,26 @@ class Brakeman::FindAllCalls < Brakeman::BasicProcessor
     cached = @cache[call]
     return cached if cached
 
-    if node_type? call, :call, :attrasgn
-      @cache[call] = get_chain(call.target) + [call.method]
+    res = if node_type? call, :call, :attrasgn
+      get_chain(call.target) + [call.method]
     elsif call.nil?
       EMPTY_ARRAY
     else
-      @cache[call] = [get_target(call)]
+      [get_target(call)]
+    end
+
+    if not_self call
+      @cache[call] = res
+    end
+
+    res
+  end
+
+  def not_self exp
+    if call? exp
+      not_self exp.target
+    else
+      not node_is? exp, :self
     end
   end
 
