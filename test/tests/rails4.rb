@@ -15,7 +15,7 @@ class Rails4Tests < Test::Unit::TestCase
       :controller => 0,
       :model => 2,
       :template => 8,
-      :generic => 75
+      :generic => 77
     }
   end
 
@@ -834,6 +834,19 @@ class Rails4Tests < Test::Unit::TestCase
       :user_input => s(:call, s(:call, nil, :params), :[], s(:lit, :id))
   end
 
+  def test_cross_site_scripting_in_comparison_false_positive
+    assert_no_warning :type => :template,
+      :warning_code => 2,
+      :fingerprint => "70f4d1c73e97cdcc0581309169cf59bde767f9f02666421ae9f3b22604f8c37f",
+      :warning_type => "Cross Site Scripting",
+      :line => 18,
+      :message => /^Unescaped\ parameter\ value/,
+      :confidence => 0,
+      :relative_path => "app/views/users/index.html.erb",
+      :code => s(:call, s(:call, s(:call, nil, :params), :[], s(:lit, :x)), :==, s(:lit, 1)),
+      :user_input => nil
+  end
+
   def test_sql_injection_in_chained_string_building
     assert_warning :type => :warning,
       :warning_code => 0,
@@ -978,6 +991,41 @@ class Rails4Tests < Test::Unit::TestCase
       :code => s(:call, s(:const, :User), :where, s(:hash, s(:call, s(:params), :[], s(:lit, :key)), s(:call, s(:params), :[], s(:lit, :stuff)))),
       :user_input => s(:call, s(:params), :[], s(:lit, :key))
   end
+
+  def test_sql_injection_with_permit
+    assert_no_warning :type => :warning,
+      :warning_code => 0,
+      :fingerprint => "195c3ab08dd4b4f11a29afabb704cefe1d8987a9a7690e7c8299900c9e888a94",
+      :warning_type => "SQL Injection",
+      :line => 119,
+      :message => /^Possible\ SQL\ injection/,
+      :confidence => 0,
+      :relative_path => "app/controllers/users_controller.rb",
+      :code => s(:call, s(:const, :User), :find_by, s(:call, s(:params), :permit, s(:lit, :OMG))),
+      :user_input => s(:call, s(:params), :permit, s(:lit, :OMG))
+
+    assert_warning :type => :warning,
+      :warning_code => 0,
+      :fingerprint => "1f92b0ca5290f5c4de78cfa33a72c2f845604062fa0d5c31f1800111cf191f36",
+      :warning_type => "SQL Injection",
+      :line => 120,
+      :message => /^Possible\ SQL\ injection/,
+      :confidence => 0,
+      :relative_path => "app/controllers/users_controller.rb",
+      :code => s(:call, s(:const, :User), :find_by, s(:call, s(:call, s(:params), :permit, s(:lit, :OMG)), :[], s(:lit, :OMG))),
+      :user_input => s(:call, s(:call, s(:params), :permit, s(:lit, :OMG)), :[], s(:lit, :OMG))
+
+    assert_warning :type => :warning,
+      :warning_code => 0,
+      :fingerprint => "420d307a7e184dab8298c445acbf12df7cd106d38bc60886d9e2583972f3a6f5",
+      :warning_type => "SQL Injection",
+      :line => 121,
+      :message => /^Possible\ SQL\ injection/,
+      :confidence => 0,
+      :relative_path => "app/controllers/users_controller.rb",
+      :code => s(:call, s(:const, :User), :where, s(:dstr, "", s(:evstr, s(:call, s(:params), :permit, s(:lit, :OMG))))),
+      :user_input => s(:call, s(:params), :permit, s(:lit, :OMG))
+  end
  
   def test_format_validation_model_alias_processing
     assert_warning :type => :model,
@@ -1101,6 +1149,20 @@ class Rails4Tests < Test::Unit::TestCase
       :confidence => 0,
       :relative_path => "app/controllers/users_controller.rb",
       :user_input => s(:call, s(:params), :[], s(:lit, :x))
+  end
+
+
+  def test_unsafe_reflection_comparison_false_positive
+    assert_no_warning :type => :warning,
+      :warning_code => 24,
+      :fingerprint => "df957ee4f94d5c14f0ad24eb4b185b274721ac5edd72addd6ed54cf10a4c11bb",
+      :warning_type => "Remote Code Execution",
+      :line => 90,
+      :message => /^Unsafe\ reflection\ method\ constantize\ cal/,
+      :confidence => 1,
+      :relative_path => "app/controllers/friendly_controller.rb",
+      :code => s(:call, s(:iter, s(:call, s(:array, s(:str, "Post"), s(:str, "Comments")), :detect), s(:args, :k), s(:call, s(:lvar, :k), :==, s(:call, s(:params), :[], s(:lit, :a)))), :constantize),
+      :user_input => s(:call, s(:params), :[], s(:lit, :a))
   end
 
   def test_sql_injection_CVE_2013_6417
