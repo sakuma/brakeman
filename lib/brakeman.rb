@@ -72,7 +72,7 @@ module Brakeman
       options.delete :quiet
     end
 
-    options = default_options.merge(load_options(options)).merge(options)
+    options = default_options.merge(options).merge(load_options(options))
 
     if options[:quiet].nil? and not command_line
       options[:quiet] = true
